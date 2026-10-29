@@ -257,8 +257,9 @@
     marker.setIcon(iconoPin(sede, true));
     activo = marker;
 
+    const popupW = Math.min(300, window.innerWidth - 40);
     marker.bindPopup(popupHtml(item || { sede, carreras: (sede.carreras || []).map(sc => ({ c: carrerasById.get(sc.id), sc })).filter(x => x.c) }), {
-      closeButton: true, autoPan: true, maxWidth: 320, minWidth: 300, offset: [0, 0]
+      closeButton: true, autoPan: true, maxWidth: popupW + 20, minWidth: popupW, offset: [0, 0]
     });
 
     if (opts && opts.fly) {
