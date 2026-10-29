@@ -156,7 +156,7 @@ a { color: inherit; }
   margin-top: 10px;
 }
 
-.chips { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.chips { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
 
 .chip {
   display: inline-flex; align-items: center; gap: 6px;
