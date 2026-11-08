@@ -54,6 +54,10 @@ window.IFTS_DATA = {
     { id: 'emprendimientos-gastronomicos', nombre: 'Tecnicatura Superior en Emprendimientos Gastronómicos', area: 'turismo' },
 
     { id: 'realizacion-audiovisual', nombre: 'Tecnicatura Superior en Realización Audiovisual', area: 'comunicacion' },
+    { id: 'diseno-grafico-multimedial', nombre: 'Tecnicatura Superior en Diseño Gráfico y Multimedial', area: 'comunicacion' },
+    { id: 'interpretacion-lengua-senas', nombre: 'Tecnicatura Superior en Interpretación de Lengua de Señas Argentina', area: 'social' },
+    { id: 'desarrollo-software-distancia', nombre: 'Tecnicatura Superior en Desarrollo de Software a Distancia', area: 'tic' },
+    { id: 'desarrollo-software-simuladores', nombre: 'Tecnicatura Superior en Desarrollo de Software de Simuladores', area: 'tic' },
 
     { id: 'distribucion-energia', nombre: 'Tecnicatura Superior en Distribución de la Energía Eléctrica', area: 'energia' },
     { id: 'energias-renovables', nombre: 'Tecnicatura Superior en Gestión de Energías Renovables', area: 'energia' },
@@ -86,6 +90,17 @@ window.IFTS_DATA = {
       carreras: [
         { id: 'analisis-de-sistemas', duracion: 2.5, turnos: ['noche'], modalidad: ['hibrida'] },
         { id: 'desarrollo-de-software', duracion: 2.5, turnos: ['noche'], modalidad: ['hibrida'] }
+      ]
+    },
+    {
+      id: 'ifts-5', numero: 5, comparteCon: [],
+      direccion: 'Rodríguez Peña',
+      nota: 'Altura sin confirmar: la fuente ubica la sede sobre Rodríguez Peña, a metros del IFTS 9.',
+      barrio: 'San Nicolás', comuna: 1,
+      lat: -34.59995, lng: -58.3912844,
+      sitio: '',
+      carreras: [
+        { id: 'interpretacion-lengua-senas', duracion: 3, turnos: ['noche'], modalidad: ['hibrida'] }
       ]
     },
     {
@@ -236,6 +251,30 @@ window.IFTS_DATA = {
         { id: 'desarrollo-de-software', duracion: 2.5, turnos: ['noche'], modalidad: ['hibrida'] },
         { id: 'redes-ciberseguridad', duracion: 2.5, turnos: ['noche'], modalidad: ['hibrida'] },
         { id: 'telecomunicaciones', duracion: 2.5, turnos: ['noche'], modalidad: ['hibrida'] }
+      ]
+    },
+    {
+      id: 'ifts-27', numero: 27, comparteCon: [],
+      direccion: 'Av. Asamblea',
+      nota: 'Altura sin confirmar. El catálogo oficial también le asigna una sede en Caballito (Diseño Gráfico y Multimedial).',
+      barrio: 'Parque Chacabuco', comuna: 7,
+      lat: -34.6357466, lng: -58.44231,
+      sitio: '',
+      carreras: [
+        { id: 'diseno-grafico-multimedial', duracion: 3, turnos: ['noche'], modalidad: ['hibrida'] },
+        { id: 'interpretacion-lengua-senas', duracion: 3, turnos: ['noche'], modalidad: ['hibrida'] }
+      ]
+    },
+    {
+      id: 'ifts-29', numero: 29, comparteCon: [],
+      direccion: 'Yerbal',
+      nota: 'Altura sin confirmar. El catálogo oficial lo ubica en San Nicolás; la geolocalización de la sede da Caballito.',
+      barrio: 'Caballito', comuna: 6,
+      lat: -34.6141777, lng: -58.4307147,
+      sitio: '',
+      carreras: [
+        { id: 'desarrollo-software-distancia', duracion: 2.5, turnos: ['noche'], modalidad: ['distancia'] },
+        { id: 'desarrollo-software-simuladores', duracion: 2.5, turnos: ['noche'], modalidad: ['hibrida'] }
       ]
     },
     {

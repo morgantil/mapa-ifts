@@ -114,8 +114,9 @@
 
   function sedePasaTexto(s) {
     if (!state.q) return true;
+    const q = norm(state.q);
     const blob = norm([s.nombre, s.direccion, s.barrio, 'ifts ' + s.numero, (s.comparteCon || []).join(' ')].join(' '));
-    return blob.indexOf(state.q) !== -1;
+    return blob.indexOf(q) !== -1;
   }
 
   function filtrar() {
