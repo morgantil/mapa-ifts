@@ -194,17 +194,66 @@
   let userMarker = null;
   let activo = null;
 
-  function iconoPin(sede, esActivo) {
+  function iconoPin(sede, esActivo, off) {
     const doble = (sede.comparteCon || []).length > 0;
     const numero = doble ? sede.numero + '·' + sede.comparteCon.join('·') : String(sede.numero);
     const clase = 'pin' + (doble ? ' pin--doble' : '') + (esActivo ? ' pin--activo' : '');
+    const dx = off ? off.dx : 0;
+    const dy = off ? off.dy : 0;
     return L.divIcon({
       className: 'pin-wrap',
       html: `<div class="${clase}" role="img" aria-label="IFTS ${numero}"><span>${numero}</span></div>`,
       iconSize: [34, 34],
-      iconAnchor: [17, 34],
-      popupAnchor: [0, -32]
+      iconAnchor: [17 - dx, 34 - dy],
+      popupAnchor: [dx, -32 + dy]
     });
+  }
+
+  /* Los pines que quedan demasiado juntos se empujan hasta separarse.
+     Se resuelve por relajación: cada par más cercano que MIN se aparta un
+     poco y se repite hasta que no queden choques (o se llegue al tope). */
+  function dispersar() {
+    if (!markers.size) return;
+    const MIN = 36;
+    const MAX = 30;
+    const ITER = 60;
+
+    const vis = [];
+    markers.forEach((m, id) => {
+      if (!map.hasLayer(m)) return;
+      vis.push({ id, m, p: map.latLngToContainerPoint(m.getLatLng()), ox: 0, oy: 0 });
+    });
+
+    for (let k = 0; k < ITER; k++) {
+      let movido = false;
+      for (let i = 0; i < vis.length; i++) {
+        for (let j = i + 1; j < vis.length; j++) {
+          const a = vis[i], b = vis[j];
+          let dx = (b.p.x + b.ox) - (a.p.x + a.ox);
+          let dy = (b.p.y + b.oy) - (a.p.y + a.oy);
+          let d = Math.hypot(dx, dy);
+          if (d >= MIN) continue;
+          if (d < 0.01) { dx = 0.01; dy = -1; d = 1; }
+          const empuje = (MIN - d) / 2;
+          const ux = dx / d, uy = dy / d;
+          a.ox -= ux * empuje; a.oy -= uy * empuje;
+          b.ox += ux * empuje; b.oy += uy * empuje;
+          movido = true;
+        }
+      }
+      if (!movido) break;
+    }
+
+    vis.forEach(v => {
+      v.ox = Math.max(-MAX, Math.min(MAX, v.ox));
+      v.oy = Math.max(-MAX, Math.min(MAX, v.oy));
+      const sede = sedeDe(v.id);
+      if (sede) v.m.setIcon(iconoPin(sede, v.m === activo, { dx: Math.round(v.ox), dy: Math.round(v.oy) }));
+    });
+  }
+
+  function sedeDe(id) {
+    return sedes.find(s => s.id === id);
   }
 
   function sedeLabel(sede) {
@@ -251,12 +300,8 @@
     const marker = markers.get(sede.id);
     if (!marker) return;
 
-    if (activo && activo !== marker) {
-      const prev = sedes.find(s => markers.get(s.id) === activo);
-      if (prev) activo.setIcon(iconoPin(prev, false));
-    }
-    marker.setIcon(iconoPin(sede, true));
     activo = marker;
+    dispersar();
 
     const popupW = Math.min(300, window.innerWidth - 40);
     marker.bindPopup(popupHtml(item || { sede, carreras: (sede.carreras || []).map(sc => ({ c: carrerasById.get(sc.id), sc })).filter(x => x.c) }), {
@@ -279,8 +324,6 @@
     // al cambiar filtros, la ficha abierta deja de tener sentido
     if (activo) {
       map.closePopup();
-      const prev = sedes.find(s => markers.get(s.id) === activo);
-      if (prev) activo.setIcon(iconoPin(prev, false));
       activo = null;
     }
 
@@ -314,6 +357,9 @@
       }
     }
 
+    dispersar();
+    renderIndice(resultados);
+
     // contador + limpiar + URL
     const n = resultados.length;
     $('#contador').textContent = n === 0 ? 'Sin resultados' : (n === 1 ? '1 IFTS' : n + ' IFTS');
@@ -337,6 +383,10 @@
     } else if (!hayFiltros) {
       map.setView([CABA.lat, CABA.lng], 12);
     }
+
+    // el encuadre cambia el zoom: recalcular la separación de pines al terminar
+    clearTimeout(render._t);
+    render._t = setTimeout(dispersar, 650);
   }
 
   function renderLista(resultados) {
@@ -373,6 +423,69 @@
 
   function marcarItemActivo(id) {
     document.querySelectorAll('.item').forEach(el => el.classList.toggle('item--activo', el.dataset.sede === id));
+  }
+
+  /* ------------------------------------------------- índice numérico */
+  function renderIndice(resultados) {
+    const grilla = $('#indiceGrilla');
+    if (!grilla) return;
+    const lista = resultados.slice().sort((a, b) => a.sede.numero - b.sede.numero);
+    $('#indiceTitulo').textContent = lista.length === 1 ? '1 IFTS' : lista.length + ' IFTS por número';
+    grilla.innerHTML = lista.map(({ sede }) => {
+      const etiqueta = sede.comparteCon && sede.comparteCon.length
+        ? sede.numero + '·' + sede.comparteCon.join('·')
+        : String(sede.numero);
+      return `<button class="indice__num" type="button" data-sede="${sede.id}" aria-label="${esc(sedeLabel(sede))} — ${esc(sede.barrio)}">
+        <b>${etiqueta}</b><small>${esc(sede.barrio)}</small>
+      </button>`;
+    }).join('');
+
+    grilla.querySelectorAll('.indice__num').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const it = ultimos.find(r => r.sede.id === btn.dataset.sede);
+        if (it) mostrarFichaIndice(it);
+      });
+    });
+  }
+
+  function mostrarFichaIndice(item) {
+    const s = item.sede;
+    $('#indiceGrilla').hidden = true;
+    $('#indiceDetalle').hidden = false;
+    $('#indiceFicha').innerHTML = popupHtml(item);
+
+    // la ubicación también queda marcada en el mapa, detrás del panel
+    const marker = markers.get(s.id);
+    if (marker) {
+      activo = marker;
+      dispersar();
+      map.flyTo([s.lat, s.lng], Math.max(map.getZoom(), 15), { duration: 0.6 });
+    }
+    $('#indiceTitulo').textContent = sedeLabel(s);
+  }
+
+  function volverIndice() {
+    $('#indiceDetalle').hidden = true;
+    $('#indiceGrilla').hidden = false;
+    const lista = ultimos.slice().sort((a, b) => a.sede.numero - b.sede.numero);
+    $('#indiceTitulo').textContent = lista.length === 1 ? '1 IFTS' : lista.length + ' IFTS por número';
+  }
+
+  function toggleIndice(force) {
+    const panel = $('#panelIndice');
+    if (!panel) return;
+    const abrir = typeof force === 'boolean' ? force : !panel.classList.contains('indice--abierto');
+    panel.classList.toggle('indice--abierto', abrir);
+    panel.setAttribute('aria-hidden', String(!abrir));
+    $('#btnIndice').setAttribute('aria-pressed', String(abrir));
+    if (abrir) {
+      volverIndice();
+      const primero = $('#indiceGrilla .indice__num');
+      if (primero) primero.focus();
+    } else {
+      $('#indiceDetalle').hidden = true;
+      $('#indiceGrilla').hidden = false;
+    }
   }
 
   /* ----------------------------------------------------------------- URL */
@@ -493,6 +606,12 @@
     $('#btnResetVacio').addEventListener('click', limpiar);
     $('#btnLista').addEventListener('click', () => toggleLista());
     $('#btnCerrarLista').addEventListener('click', () => toggleLista(false));
+    $('#btnIndice').addEventListener('click', () => toggleIndice());
+    $('#btnCerrarIndice').addEventListener('click', () => toggleIndice(false));
+    $('#btnVolverIndice').addEventListener('click', volverIndice);
+    $('#panelIndice').addEventListener('click', (e) => {
+      if (e.target === $('#panelIndice')) toggleIndice(false);
+    });
 
     $('#btnFiltros').addEventListener('click', (e) => {
       const abierto = document.querySelector('.filters').classList.toggle('filters--abiertos');
@@ -538,11 +657,15 @@
 
     // teclado
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') { toggleLista(false); }
+      if (e.key === 'Escape') { toggleLista(false); toggleIndice(false); }
       if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
         e.preventDefault(); $('#q').focus();
       }
     });
+
+    // al cambiar el zoom, los pines que se acercan se vuelven a separar
+    map.on('zoomend', dispersar);
+    map.on('moveend', dispersar);
 
     render();
 

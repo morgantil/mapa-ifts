@@ -7,7 +7,7 @@
 <meta name="description" content="Mapa de los Institutos de Formación Técnica Superior de la Ciudad de Buenos Aires. Encontrá qué carreras se dictan en cada sede.">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="assets/tokens.css">
-<link rel="stylesheet" href="assets/estilos.css?v=20261108">
+<link rel="stylesheet" href="assets/estilos.css?v=20261109">
 </head>
 <body>
 
@@ -41,6 +41,10 @@
         <button id="btnLista" class="ghost-btn" type="button" aria-pressed="false">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
           <span>Lista</span>
+        </button>
+        <button id="btnIndice" class="ghost-btn" type="button" aria-pressed="false">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          <span>Números</span>
         </button>
         <button id="btnFiltros" class="ghost-btn ghost-btn--mobile" type="button" aria-expanded="false" aria-controls="panelFiltros">
           Filtros <span id="badgeFiltros" class="badge-count" hidden>0</span>
@@ -120,6 +124,27 @@
     </div>
     <div id="listaItems" class="lista__items"></div>
   </aside>
+
+  <div id="panelIndice" class="indice" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="indiceTitulo">
+    <div class="indice__caja">
+      <div class="indice__head">
+        <h2 id="indiceTitulo">IFTS por número</h2>
+        <button id="btnCerrarIndice" class="icon-btn" type="button" aria-label="Cerrar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+
+      <div id="indiceGrilla" class="indice__grilla"></div>
+
+      <div id="indiceDetalle" class="indice__detalle" hidden>
+        <button id="btnVolverIndice" class="indice__volver" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          Todos los números
+        </button>
+        <div id="indiceFicha"></div>
+      </div>
+    </div>
+  </div>
 </main>
 
 <footer class="pie">
@@ -130,7 +155,7 @@
 </footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="datos/ifts.js?v=20261108"></script>
-<script src="assets/app.js?v=20261108"></script>
+<script src="datos/ifts.js?v=20261109"></script>
+<script src="assets/app.js?v=20261109"></script>
 </body>
 </html>
